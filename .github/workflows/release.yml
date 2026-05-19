@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build release binary
+        run: cargo build --release
+
+      - name: Archive release binary
+        run: |
+          mkdir -p dist
+          cp target/release/rust_hello_world dist/
+          tar -czf rust_hello_world-linux-x86_64.tar.gz -C dist rust_hello_world
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: rust_hello_world-linux-x86_64.tar.gz
